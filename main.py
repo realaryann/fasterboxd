@@ -4,40 +4,125 @@ from bs4 import BeautifulSoup
 from PIL import ImageTk, Image
 global dfindmovieimg,dtvphoto
 import time
+import pickle
+
+class Movie():
+    
+    def __init__(self,name):
+        self.name = name
+        self.similar_list = list()
+    
+    def insert_similar_movie(self, similar_movie):
+        self.similar_list.append(similar_movie)
+    
+    def remove_similar(self,remove_this_movie):
+        for i in range(0,len(self.similar_list)):
+            if (self.similar_list[i] == remove_this_movie):
+                self.similar_list.pop(i)
+    
+    def get_name(self):
+        return self.name
+    
+    def get_similar(self):
+        return self.similar_list
+    
+    def get_similar_size(self):
+        return len(self.similar_list)
+
+class Show():
+    
+    def __init__(self,show):
+        self.name=show;
+        self.similar_list = list()
+    
+    def insert_similar_show(self,similar_show):
+        self.similar_list.append(similar_show)
+    
+    def remove_similar(self,remove_this_show):
+        for i in range(0, len(self.similar_list)):
+            if (self.similar_list[i] == remove_this_show):
+                self.similar_list.pop(i)
+                
+    def get_name(self):
+        return self.name
+    
+    def get_similar_size(self):
+        return len(self.similar_list)
+    
+    def get_similar(self):
+        return self.similar_list
 
 def image_reducer(x,y, image):
     newimg = image.resize((x,y),Image.LANCZOS)
     return newimg
 
+def check_if_show_exists(showname):
+    with open("show.pickle","rb") as sfile:
+        while True:
+            try:
+                showob = pickle.load(sfile)
+                if (showob.get_name()==showname):
+                    return showob
+            except EOFError:
+                break
+        return 0
+    
+def check_if_movie_exists(moviename):
+    with open("movie.pickle","rb") as mfile:
+        while True:
+            try:
+                movieob = pickle.load(mfile)
+                if (movieob.get_name()==moviename):
+                    return movieob
+            except EOFError:
+                break
+        return 0
+    
 def behindthemovie(moviename, limit,frame):
+    tempobj=check_if_movie_exists(moviename)
     textlab = Text(frame,height=7,width=70,bg='grey24')
     textlab.grid(row=0,column=0)
-    correctedmovie = ''
-    for i in moviename:
-        if i == ' ':
-            correctedmovie+='-'
+    if(tempobj != 0):
+        if (tempobj.get_similar_size() < int(limit)):
+            for i in range(0,tempobj.get_similar_size()):
+                textlab.insert(END, tempobj.get_similar()[i]+'\n')
+            textlab.configure(font=("Segoe UI Semibold",12),state=DISABLED,fg="white")
         else:
-            correctedmovie+=i.lower()
-    url = f'https://letterboxd.com/film/{correctedmovie}/similar/'
-    moviepage = requests.get(url).text
-    moviesoup = BeautifulSoup(moviepage, 'html.parser')
-    ul = moviesoup.find('ul',class_="poster-list -p125 -grid film-list")
-    posters= ul.find_all('img')
-    j=0
-    recolist = []
-    if (int(limit) > len(posters)):
-        for i in posters:
-            recolist.append(i['alt'])
+            for i in range(0,int(limit)):
+                textlab.insert(END, tempobj.get_similar()[i]+'\n')
+            textlab.configure(font=("Segoe UI Semibold",12),state=DISABLED,fg="white")
     else:
-        for i in posters:
-            if (j<int(limit)):
-                recolist.append(i['alt'])
-                j+=1
+        movieobj = Movie(moviename)
+        correctedmovie = ''
+        for i in moviename:
+            if i == ' ':
+                correctedmovie+='-'
             else:
-                break
-    for i in recolist:
-        textlab.insert(END, i+'\n')
-    textlab.configure(font=("Segoe UI Semibold",12),state=DISABLED,fg="white")
+                correctedmovie+=i.lower()
+        url = f'https://letterboxd.com/film/{correctedmovie}/similar/'
+        moviepage = requests.get(url).text
+        moviesoup = BeautifulSoup(moviepage, 'html.parser')
+        ul = moviesoup.find('ul',class_="poster-list -p125 -grid film-list")
+        posters= ul.find_all('img')
+        j=0
+        recolist = []
+        if (int(limit) > len(posters)):
+            for i in posters:
+                recolist.append(i['alt'])
+                movieobj.insert_similar_movie(i['alt'])
+        else:
+            for i in posters:
+                if (j<int(limit)):
+                    recolist.append(i['alt'])
+                    movieobj.insert_similar_movie(i['alt'])
+                    j+=1
+                else:
+                    break
+        with open("movie.pickle","ab") as moviefile:
+            pickle.dump(movieobj,moviefile)
+        for i in recolist:
+            textlab.insert(END, i+'\n')
+        textlab.configure(font=("Segoe UI Semibold",12),state=DISABLED,fg="white")
 
     
 def findmovie():
@@ -71,34 +156,50 @@ def findmovie():
     moviegui.resizable(FALSE,FALSE)
 
 def behindthetv(show, limit,frame):
+    tempsh= check_if_show_exists(show)
     tvtextlab = Text(frame,height=7,width=70,bg='grey24')
     tvtextlab.grid(row=0,column=0)
-    correctedshow = ''
-    for i in show:
-        if i == ' ':
-            correctedshow+='_'
+    if(tempsh != 0):
+        if (tempsh.get_similar_size() < int(limit)):
+            for i in range(0,tempsh.get_similar_size()):
+                tvtextlab.insert(END, tempsh.get_similar()[i]+'\n')
+            tvtextlab.configure(font=("Segoe UI Semibold",12),state=DISABLED,fg="white")
         else:
-            correctedshow+=i.lower()
-    url = f'https://www.rottentomatoes.com/tv/{correctedshow}'
-    presoup = requests.get(url).text
-    tvsoup = BeautifulSoup(presoup, 'html.parser')
-    soup1 = tvsoup.find('tiles-carousel-responsive')
-    soup2 = soup1.find_all('span')
-    k = 0
-    tvrecos = []
-    if (int(limit) > len(soup2)):
-        for i in soup2:
-            tvrecos.append(i.string)
+            for i in range(0,int(limit)):
+                tvtextlab.insert(END, tempsh.get_similar()[i]+'\n')
+            tvtextlab.configure(font=("Segoe UI Semibold",12),state=DISABLED,fg="white")
     else:
-        for i in soup2:
-            if (k < int(limit)):
-                tvrecos.append(i.string)
-                k+=1
+        showobj = Show(show)
+        correctedshow = ''
+        for i in show:
+            if i == ' ':
+                correctedshow+='_'
             else:
-                break
-    for i in tvrecos:
-        tvtextlab.insert(END, i+'\n')
-    tvtextlab.configure(font=("Segoe UI Semibold",12),state=DISABLED,fg="white")
+                correctedshow+=i.lower()
+        url = f'https://www.rottentomatoes.com/tv/{correctedshow}'
+        presoup = requests.get(url).text
+        tvsoup = BeautifulSoup(presoup, 'html.parser')
+        soup1 = tvsoup.find('tiles-carousel-responsive')
+        soup2 = soup1.find_all('span')
+        k = 0
+        tvrecos = []
+        if (int(limit) > len(soup2)):
+            for i in soup2:
+                tvrecos.append(i.text)
+                showobj.insert_similar_show(i.text)
+        else:
+            for i in soup2:
+                if (k < int(limit)):
+                    tvrecos.append(i.text)
+                    showobj.insert_similar_show(i.text)
+                    k+=1
+                else:
+                    break
+        with open("show.pickle","ab") as showfile:
+            pickle.dump(showobj,showfile)
+        for i in tvrecos:
+            tvtextlab.insert(END, i+'\n')
+        tvtextlab.configure(font=("Segoe UI Semibold",12),state=DISABLED,fg="white")
 
 def findtv():
     global dtvphoto
