@@ -28,3 +28,7 @@
 </p>
 
 <h3>This allows for efficient and offline querying of movies and tv shows.</h3>
+
+<h2>Currently in-development processes: </h2>
+<p>The third major use of FasterBoxd is the ability to log or record movies and tv shows that the user has already seen.</p>
+<p>Current idea is to use the time library to generate unique filenames for users that they can re-use to record their recently watched movies/shows</p>
