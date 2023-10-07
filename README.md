@@ -20,9 +20,9 @@
 
 <p>The reason why this app is known as "FasterBoxd" is due to the behind-the-scenes of every query<br>
   <ol>
-  <li>Every time a movie and a number of recommendations are inputed, FasterBoxd converts the input into a SHOW or MOVIE object.</li>
-  <li>Then, the shows.pickle or movies.pickle files are browsed to see if this movie was previously queryed.</li>
-  <li>If they were, no web scraping is done and the previous query is loaded using pickle.</li>
-  <li>the SHOW and MOVIE classes contain attributes which inclue list of similar movies, making it easy to print it via TKinter</li>
+    <li>Every time a movie and a number of recommendations are inputed, FasterBoxd converts the input into a SHOW or MOVIE object.</li>
+    <li>Then, the shows.pickle or movies.pickle files are browsed to see if this movie was previously queryed.</li>
+    <li>If they were, no web scraping is done and the previous query is loaded using pickle.</li>
+    <li>the SHOW and MOVIE classes contain attributes which inclue list of similar movies, making it easy to print it via TKinter</li>
  </ol>
 </p>
