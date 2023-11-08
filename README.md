@@ -11,8 +11,8 @@
 </ul>
 
 ![image](https://github.com/realaryann/fasterboxd/assets/70107111/0c151bc5-aa1d-4ee4-b6b5-373263f9036a)
+<br>
 <p>Home Page for FasterBoxd</p>
-
 
 <p>Data for recommendations was obtained from the following websites</p>
 <ul>
