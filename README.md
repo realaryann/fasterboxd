@@ -1,6 +1,6 @@
 # Fasterboxd 🏎️💨
 
-<h2>Fasterboxd is a desktop python app capable of using web scraping technologies to deliver accurate recommendations</h2>
+<h2>Fasterboxd is a desktop python app capable of using web scraping technologies to deliver accurate movie and tv recommendations</h2>
 <p>It uses the following tech-stack</p>
 <ul>
   <li>BeautifulSoup</li>
